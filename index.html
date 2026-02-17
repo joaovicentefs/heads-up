@@ -80,6 +80,12 @@ body{height:100%;width:100%;overflow:hidden;font-family:'Nunito',sans-serif;colo
 .btn-quit{position:absolute;top:1rem;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.25);border-radius:50px;padding:.4rem 1.2rem;font-size:.75rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:inherit;z-index:10;transition:opacity .2s}
 .btn-quit:active{transform:translateX(-50%) scale(.93)}
 
+/* MODE TOGGLE */
+.mode-toggle{display:flex;background:rgba(255,255,255,.1);border-radius:50px;padding:3px;margin-bottom:1.25rem;gap:3px}
+.mode-btn{flex:1;padding:.45rem 1rem;border:none;border-radius:50px;background:transparent;color:rgba(255,255,255,.6);font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .25s;text-transform:uppercase;letter-spacing:1px}
+.mode-btn.active{background:#fff;color:#1a1a2e;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.mode-btn:active{transform:scale(.95)}
+
 /* HELP LINK */
 .link-help{color:rgba(255,255,255,.5);font-size:.85rem;font-weight:700;text-decoration:none;letter-spacing:1px;padding:.75rem 0;transition:color .2s}
 .link-help:active{color:rgba(255,255,255,.8)}
@@ -89,7 +95,11 @@ body{height:100%;width:100%;overflow:hidden;font-family:'Nunito',sans-serif;colo
 
 <div class="screen home-bg active" id="homeScreen">
   <div class="logo">Adivinha!</div>
-  <div class="subtitle">Jogo de Adivinhação</div>
+  <div class="subtitle" id="subtitle">Jogo de Adivinhação</div>
+  <div class="mode-toggle" id="modeToggle">
+    <button class="mode-btn active" onclick="setMode(false)">Adulto</button>
+    <button class="mode-btn" onclick="setMode(true)">Jovens ⭐</button>
+  </div>
   <div class="grid" id="catGrid"></div>
   <a href="instrucoes.html" class="link-help">Como Jogar?</a>
 </div>
@@ -302,6 +312,102 @@ var CATS={
   ]}
 };
 
+var CATS_JOVENS={
+  filmes:{icon:"🎬",color:"#E63946",words:[
+    "Frozen","Frozen 2","Moana","Encanto","Luca","Divertida Mente","Divertida Mente 2","Toy Story","Toy Story 4","Procurando Nemo",
+    "Procurando Dory","Rei Leão","Aladdin","A Pequena Sereia","Shrek","Madagascar","Kung Fu Panda","A Era do Gelo","Carros","Monstros S.A.",
+    "Up","Wall-E","Ratatouille","Os Incríveis","Minions","Super Mario Bros","Sonic","Homem-Aranha no Aranhaverso","WiFi Ralph","O Gato de Botas 2",
+    "Barbie","Trolls","Hotel Transilvânia","Pets","Como Treinar seu Dragão","Enrolados","Valente","Big Hero 6","Zootopia","Detona Ralph",
+    "Turma da Mônica","Patrulha Canina O Filme","Viva","Harry Potter","Jumanji","Pantera Negra","Vingadores","Homem-Aranha","Sing","Lilo e Stitch",
+    "Abominável","Elemental","Wish","Red","A Família Mitchell"
+  ]},
+  desenhos:{icon:"📺",color:"#8338EC",words:[
+    "Bob Esponja","Patrulha Canina","Peppa Pig","Turma da Mônica","Pokémon","Miraculous Ladybug","Bluey","Show da Luna","Tom e Jerry","Scooby-Doo",
+    "Power Rangers","Gravity Falls","Phineas e Ferb","Hora de Aventura","Meninas Superpoderosas","Ben 10","Gumball","Teen Titans Go","Tartarugas Ninja","Steven Universe",
+    "Chaves","Sítio do Picapau Amarelo","Padrinhos Mágicos","Coragem o Cão Covarde","Duck Tales","Pica-Pau","Pantera Cor-de-Rosa","Dragon Ball","Naruto","Simpsons",
+    "Lego Ninjago","Masha e o Urso","Backyardigans","Dora Aventureira","PJ Masks","Galinha Pintadinha","Mundo Bita","Castelo Rá-Tim-Bum","Cocoricó","Irmão do Jorel",
+    "Laboratório de Dexter","Johnny Bravo","Caverna do Dragão","My Little Pony","Sonic","Peixonauta","Octonautas","Mini Mundos","Luccas Neto","Maria Clara e JP"
+  ]},
+  personagens:{icon:"🦸",color:"#F72585",words:[
+    "Mickey Mouse","Pato Donald","Buzz Lightyear","Woody","Elsa","Olaf","Mario","Luigi","Pikachu","Sonic",
+    "Bob Esponja","Patrick","Homem-Aranha","Hulk","Capitão América","Thor","Homem de Ferro","Batman","Superman","Goku",
+    "Ladybug","Cat Noir","Stitch","Minions","Baby Yoda","Simba","Nemo","Dory","Shrek","Burro do Shrek",
+    "Rapunzel","Moana","Maui","Garfield","Scooby-Doo","Tom","Jerry","Chaves","Chapolin","Cebolinha",
+    "Mônica","Cascão","Magali","Princesa Peach","Bowser","Yoshi","Donkey Kong","Creeper","Steve do Minecraft","Flash",
+    "Mulher Maravilha","Thanos","Pantera Negra","Groot","Charizard","Peppa Pig","Chase da Patrulha","Marshall","Woody Woodpecker"
+  ]},
+  animais:{icon:"🐾",color:"#FF6B35",words:[
+    "Elefante","Gato","Cachorro","Papagaio","Tubarão","Borboleta","Cavalo","Tartaruga","Águia","Golfinho",
+    "Leão","Urso","Pinguim","Coruja","Polvo","Girafa","Lobo","Flamingo","Baleia","Tigre",
+    "Coelho","Jacaré","Arara","Formiga","Abelha","Sapo","Macaco","Panda","Hipopótamo","Zebra",
+    "Canguru","Foca","Capivara","Preguiça","Tucano","Raposa","Cobra","Camaleão","Pato","Ovelha",
+    "Galo","Dinossauro","Unicórnio","Dragão","Hamster","Aranha","Caracol","Morcego","Estrela-do-mar","Cavalo-marinho",
+    "Peixe-palhaço","Caranguejo","Lhama","Porco","Galinha"
+  ]},
+  acoes:{icon:"🏃",color:"#2A9D8F",words:[
+    "Dançar","Nadar","Cantar","Correr","Dormir","Rir","Chorar","Pular","Voar","Aplaudir",
+    "Assobiar","Espirrar","Bocejar","Abraçar","Girar","Pular corda","Jogar bola","Andar de bicicleta","Andar de skate","Soltar pipa",
+    "Pular amarelinha","Fazer careta","Imitar robô","Fazer embaixadinha","Jogar videogame","Escovar os dentes","Tomar banho","Comer espaguete","Abrir presente","Soprar velas",
+    "Tomar sorvete","Fazer castelo de areia","Brincar de pega-pega","Brincar de esconde-esconde","Fazer estrela","Dança da cadeira","Fazer selfie","Cozinhar","Desenhar","Pintar",
+    "Pescar","Patinar","Fotografar","Jogar tênis","Cabecear","Driblar","Fazer gol","Montar Lego","Jogar Minecraft","Surfar",
+    "Escalar","Mergulhar","Cambalhotar","Gargalhar","Engatinhar"
+  ]},
+  comidas:{icon:"🍕",color:"#E9C46A",words:[
+    "Pizza","Hambúrguer","Lasanha","Brigadeiro","Coxinha","Pastel","Sorvete","Pipoca","Bolo de chocolate","Nuggets",
+    "Batata frita","Cachorro-quente","Macarrão","Arroz e feijão","Sushi","Açaí","Pudim","Gelatina","Pão de queijo","Waffle",
+    "Crepe","Churros","Milho cozido","Algodão doce","Picolé","Paçoca","Chocolate","Biscoito","Cereal","Panqueca",
+    "Ovo frito","Suco de laranja","Yakisoba","Strogonoff","Frango frito","Espaguete","Tapioca","Cupcake","Donut","Cookie",
+    "Brownie","Nachos","Churrasco","Salada de frutas","Bolo de fubá","Maria mole","Pé de moleque","Pamonha","Canjica","Mingau",
+    "Banana split","Milk-shake","Torta de morango","Pipoca doce","Bala"
+  ]},
+  jogos:{icon:"🎮",color:"#06D6A0",words:[
+    "Minecraft","Roblox","Fortnite","Among Us","Mario Kart","FIFA","Just Dance","Fall Guys","Subway Surfers","Angry Birds",
+    "Plants vs Zombies","Fruit Ninja","Clash Royale","Free Fire","Brawl Stars","Stumble Guys","Geometry Dash","Terraria","Uno","Banco Imobiliário",
+    "Detetive","Jogo da Vida","Pula Pirata","Hot Wheels","Lego","Barbie","Quebra-cabeça","Pião","Bolinha de gude","Pega-pega",
+    "Esconde-esconde","Queimada","Dança das cadeiras","Cabo de guerra","Amarelinha","Bambolê","Pular corda","Super Trunfo","Totó","Futebol de botão",
+    "Pokémon Go","Tamagotchi","Genius","Slime","Massinha","Jogo da Velha","Xadrez","Damas"
+  ]},
+  mundo:{icon:"🌍",color:"#457B9D",words:[
+    "Praia","Montanha","Floresta","Deserto","Vulcão","Cachoeira","Oceano","Ilha","Castelo","Pirâmide",
+    "Torre Eiffel","Cristo Redentor","Coliseu","Safari","Parque de diversões","Zoológico","Aquário","Circo","Estádio","Escola",
+    "Biblioteca","Museu","Cinema","Lua","Marte","Saturno","Sol","Galáxia","Foguete","Submarino",
+    "Navio pirata","Helicóptero","Balão","Iglu","Caverna","Farol","Arco-íris","Tornado","Terremoto","Aurora boreal",
+    "Recife de coral","Floresta amazônica","Antártida","Egito","Japão","Savana","Espaço","Planeta Terra","Buraco negro","Constelação"
+  ]}
+};
+
+var jovensMode=localStorage.getItem('jovensMode')==='true';
+
+function getCats(){return jovensMode?CATS_JOVENS:CATS}
+
+function setMode(isJovens){
+  jovensMode=isJovens;
+  localStorage.setItem('jovensMode',jovensMode?'true':'false');
+  applyMode();
+  buildGrid();
+}
+
+function applyMode(){
+  var r=document.documentElement.style;
+  var btns=$('modeToggle').querySelectorAll('.mode-btn');
+  var sub=$('subtitle');
+  if(jovensMode){
+    r.setProperty('--bg','#0b0b3b');
+    r.setProperty('--bg2','#1a1a6e');
+    r.setProperty('--bg3','#2d2b7c');
+    btns[0].classList.remove('active');
+    btns[1].classList.add('active');
+    sub.textContent='Modo Jovens ⭐';
+  }else{
+    r.setProperty('--bg','#0f0c29');
+    r.setProperty('--bg2','#302b63');
+    r.setProperty('--bg3','#24243e');
+    btns[0].classList.add('active');
+    btns[1].classList.remove('active');
+    sub.textContent='Jogo de Adivinhação';
+  }
+}
+
 var TIME_OPTIONS=[30,60,90,120,0];
 var state={scr:"home",cat:null,words:[],idx:0,time:60,roundTime:60,results:[],fb:null};
 var tickId=null,fbId=null,lastAct=0,wakeLock=null;
@@ -318,9 +424,10 @@ function showScreen(name){
 
 function buildGrid(){
   var g=$("catGrid");g.innerHTML="";
-  var keys=Object.keys(CATS);
+  var cats=getCats();
+  var keys=Object.keys(cats);
   keys.forEach(function(k,i){
-    var c=CATS[k];
+    var c=cats[k];
     var d=document.createElement("div");
     d.className="cat-card";
     d.style.background="linear-gradient(145deg,"+c.color+"15,"+c.color+"35)";
@@ -334,13 +441,13 @@ function buildGrid(){
 
 function startGame(k){
   state.cat=k;state.idx=0;state.time=state.roundTime;state.results=[];state.fb=null;
-  state.words=shuffle(CATS[k].words);
+  state.words=shuffle(getCats()[k].words);
   renderReady();
   showScreen("ready");
 }
 
 function renderReady(){
-  var c=CATS[state.cat];
+  var c=getCats()[state.cat];
   $("readyScreen").style.background="linear-gradient(135deg,"+c.color+"dd,"+c.color+")";
   $("readyTitle").textContent=c.icon+" "+state.cat.toUpperCase();
   var info="Use os botões para acertar ou passar.\n\n";
@@ -393,7 +500,7 @@ function renderPlay(){
   else if(state.fb==="skip"){$("wordDisplay").textContent="❌";$("fbText").textContent="Passou!";$("fbText").style.display="block"}
   else{$("wordDisplay").textContent=state.words[state.idx]||"";$("fbText").style.display="none"}
   $("hudScore").textContent="✅ "+state.results.filter(function(r){return r.ok}).length+"  ❌ "+state.results.filter(function(r){return!r.ok}).length;
-  $("playScreen").style.background=state.fb==="ok"?"#0a8f53":state.fb==="skip"?"#c0392b":(CATS[state.cat]?CATS[state.cat].color:"#302b63");
+  var cc=getCats()[state.cat];$("playScreen").style.background=state.fb==="ok"?"#0a8f53":state.fb==="skip"?"#c0392b":(cc?cc.color:"#302b63");
   $("btnRow").style.display=state.fb?"none":"flex";
 }
 
@@ -438,6 +545,7 @@ function quitGame(){clearInterval(tickId);vib([200,100,200]);endGame()}
 function requestWakeLock(){try{if(navigator.wakeLock)navigator.wakeLock.request("screen").then(function(l){wakeLock=l})}catch(e){}}
 function releaseWakeLock(){try{if(wakeLock){wakeLock.release();wakeLock=null}}catch(e){}}
 
+applyMode();
 buildGrid();
 </script>
 </body>
