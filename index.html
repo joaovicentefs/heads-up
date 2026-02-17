@@ -69,6 +69,20 @@ body{height:100%;width:100%;overflow:hidden;font-family:'Nunito',sans-serif;colo
 .btn-again{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#1a1a2e;border:none;border-radius:50px;padding:1rem 2.5rem;font-size:1.1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:2px;margin-bottom:.75rem;font-family:inherit}
 .btn-home{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.2);border-radius:50px;padding:.75rem 2rem;font-size:.9rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:inherit}
 .btn-again:active,.btn-home:active{transform:scale(.93)}
+
+/* TIME PICKER */
+.time-picker{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem}
+.time-chip{padding:.5rem 1.1rem;border-radius:50px;border:2px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.time-chip:active{transform:scale(.93)}
+.time-chip.active{background:#fff;color:#1a1a2e;border-color:#fff}
+
+/* QUIT BUTTON */
+.btn-quit{position:absolute;top:1rem;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.25);border-radius:50px;padding:.4rem 1.2rem;font-size:.75rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:inherit;z-index:10;transition:opacity .2s}
+.btn-quit:active{transform:translateX(-50%) scale(.93)}
+
+/* HELP LINK */
+.link-help{color:rgba(255,255,255,.5);font-size:.85rem;font-weight:700;text-decoration:none;letter-spacing:1px;padding:.75rem 0;transition:color .2s}
+.link-help:active{color:rgba(255,255,255,.8)}
 </style>
 </head>
 <body>
@@ -77,16 +91,19 @@ body{height:100%;width:100%;overflow:hidden;font-family:'Nunito',sans-serif;colo
   <div class="logo">Adivinha!</div>
   <div class="subtitle">Jogo de Adivinhação</div>
   <div class="grid" id="catGrid"></div>
+  <a href="instrucoes.html" class="link-help">Como Jogar?</a>
 </div>
 
 <div class="screen ready-bg" id="readyScreen">
   <div class="ready-phone">📱</div>
   <div class="ready-title" id="readyTitle"></div>
   <div class="ready-info" id="readyInfo"></div>
+  <div class="time-picker" id="timePicker"></div>
   <button class="btn-start" onclick="beginPlaying()">Começar!</button>
 </div>
 
 <div class="screen play-bg" id="playScreen">
+  <button class="btn-quit" id="btnQuit" onclick="quitGame()">Encerrar</button>
   <div class="hud-score" id="hudScore">✅ 0  ❌ 0</div>
   <div class="hud-timer" id="hudTimer">60s</div>
   <div class="word" id="wordDisplay"></div>
@@ -121,18 +138,18 @@ var CATS={
     "Interestelar","Coringa","Mad Max","Curtindo a Vida Adoidado","Esqueceram de Mim","Beethoven",
     "Free Willy","Jumanji","A Pequena Sereia","Monstros S.A.","Exterminador do Futuro",
     "Sexta-Feira 13","A Hora do Pesadelo","O Resgate do Soldado Ryan","Flashdance",
-    "Frozen","A Múmia","O Máskara de Ferro","Um Tira no Jardim de Infância",
-    "Se Meu Fusca Falasse","Babe","Stuart Little","Flubber","George da Selva",
-    "Lisbela","Carlota Joaquina","O Quinto Elemento","Coração Valente","Contato",
+    "Frozen","A Múmia","Um Tira no Jardim de Infância",
+    "Se Meu Fusca Falasse","Stuart Little","George da Selva",
+    "O Quinto Elemento","Coração Valente",
     "O Show de Truman","As Branquelas","Todo Mundo em Pânico","Scary Movie",
     "Eu Robô","O Dia Depois de Amanhã","Pearl Harbor","A Fantástica Fábrica de Chocolate",
     "Edward Mãos de Tesoura","Os Caça-Fantasmas","Tróia","300","Divertida Mente",
-    "Coco","Kung Fu Panda","Madagascar","A Era do Gelo","Carros","Mulan",
+    "Kung Fu Panda","Madagascar","A Era do Gelo","Carros","Mulan",
     "Barbie","Oppenheimer","Top Gun Maverick","Parasita","Duna","Pantera Negra",
-    "Doutor Estranho","Encanto","Soul","Elementos","Lightyear","WiFi Ralph",
+    "Doutor Estranho","Encanto","WiFi Ralph",
     "Venom","Aquaman","Mulher Maravilha","Deadpool","John Wick","Bohemian Rhapsody",
-    "Joker","Homem-Aranha no Aranhaverso","Nope","Tudo em Todo Lugar ao Mesmo Tempo",
-    "O Gato de Botas 2","Super Mario Bros","Wonka","Pobres Criaturas"
+    "Joker","Homem-Aranha no Aranhaverso",
+    "O Gato de Botas 2","Super Mario Bros"
   ]},
   tv:{icon:"📺",color:"#8338EC",words:[
     "Dragon Ball","Cavaleiros do Zodíaco","Pokémon","Naruto","Sailor Moon","He-Man","Thundercats",
@@ -148,17 +165,17 @@ var CATS={
     "Roque Santeiro","Tieta","Terra Nostra","Smallville","Buffy","Dexter",
     "Sobrenatural","Vikings","Narcos","Black Mirror","Peaky Blinders",
     "Hermes e Renato","Casseta e Planeta","Escolinha do Professor Raimundo","Os Trapalhões",
-    "Zorra Total","Programa do Jô","Domingão do Faustão","Globo de Ouro",
+    "Zorra Total","Programa do Jô","Domingão do Faustão",
     "A Grande Família","Sítio do Picapau Amarelo","TV Globinho","Bom Dia e Companhia",
-    "Programa da Eliana","Batman do Futuro","Samurai X","Sakura Card Captors",
-    "Super Onze","Yu-Gi-Oh","Pica-Pau","Padrinhos Mágicos","Jimmy Neutron",
+    "Programa da Eliana","Batman do Futuro","Samurai X",
+    "Yu-Gi-Oh","Pica-Pau","Padrinhos Mágicos","Jimmy Neutron",
     "Laboratório de Dexter","Johnny Bravo","Meninas Superpoderosas","Coragem o Cão Covarde",
     "Duck Tales","Chip e Dale","Darkwing Duck","Caverna do Dragão",
-    "Round 6","Wandinha","Mandalorian","The Bear","Succession","Ted Lasso",
-    "Cobra Kai","Arcane","The Last of Us","Bebê Rena","One Piece","Dahmer",
-    "Emily em Paris","Bridgerton","The Crown","Mare of Easttown",
-    "Yellowjackets","Só Assassinatos no Prédio","The White Lotus","Severance",
-    "Euphoria","Manifest","3%","Sintonia","Vai na Fé","Renascer",
+    "Round 6","Wandinha","Mandalorian","Ted Lasso",
+    "Cobra Kai","Arcane","The Last of Us","Bebê Rena","One Piece",
+    "Emily em Paris","Bridgerton",
+    "Só Assassinatos no Prédio","The White Lotus",
+    "3%","Sintonia","Renascer",
     "Masterchef","The Voice","Shark Tank","De Férias com o Ex",
     "Casamento às Cegas","Too Hot to Handle","BBB","A Fazenda"
   ]},
@@ -174,19 +191,19 @@ var CATS={
     "Michael Jordan","Hebe Camargo","Ana Maria Braga","Galvão Bueno","Ratinho",
     "Zico","Chacrinha","Mussum","Chico Anysio","Jô Soares","Carmen Miranda",
     "Fernanda Montenegro","The Rock","Oprah","Rihanna","Elon Musk","Steve Jobs",
-    "Napoleão","Shakespeare","Beethoven","Mozart","Da Vinci","Frida Kahlo",
-    "Seu Jorge","Paulo Coelho","Luciano Huck","Angélica","Eliana","Dercy Gonçalves",
-    "Garrincha","Adriane Galisteu","Hortência","Daiane dos Santos","Gusttavo Lima",
+    "Beethoven",
+    "Seu Jorge","Luciano Huck","Angélica","Eliana","Dercy Gonçalves",
+    "Garrincha","Adriane Galisteu","Daiane dos Santos","Gusttavo Lima",
     "Luan Santana","Chitãozinho e Xororó","Zezé di Camargo","Mamonas Assassinas",
-    "Charlie Brown Jr.","Tim Maia","Jorge Ben Jor","Novak Djokovic","Roger Federer",
-    "Tiger Woods","Muhammad Ali","Pelé","Rivaldo","Kaká","Robinho","Denílson",
+    "Charlie Brown Jr.","Tim Maia","Jorge Ben Jor",
+    "Muhammad Ali","Pelé","Kaká",
     "Adriana Lima","Rodrigo Santoro","Wagner Moura","Lázaro Ramos","Taís Araújo",
-    "Vini Jr","Pedro Pascal","Timothée Chalamet","Bad Bunny","Dua Lipa",
+    "Vini Jr","Bad Bunny","Dua Lipa",
     "Billie Eilish","Harry Styles","Zendaya","Margot Robbie","Keanu Reeves",
-    "Ryan Reynolds","Ana de Armas","Florence Pugh","Jenna Ortega",
+    "Ryan Reynolds",
     "Virgínia","Whindersson Nunes","Felipe Neto","Casimiro","Juliette",
-    "Ary Fontoura","Gloria Groove","Pabllo Vittar","Ludmilla","Luísa Sonza",
-    "Marília Mendonça","Alok","Kondzilla","Fábio Porchat","Paulo Vieira",
+    "Gloria Groove","Pabllo Vittar","Ludmilla","Luísa Sonza",
+    "Marília Mendonça","Alok","Fábio Porchat","Paulo Vieira",
     "Richarlison","Endrick","Rebeca Andrade","Rayssa Leal","Gabriel Medina",
     "Lewis Hamilton","Max Verstappen","LeBron James","Serena Williams"
   ]},
@@ -199,29 +216,29 @@ var CATS={
     "Ornitorrinco","Iguana","Piranha","Água-viva","Castor","Búfalo","Corvo","Salamandra",
     "Tamanduá","Avestruz","Suricato","Gambá","Quati","Mico-leão-dourado","Onça-pintada",
     "Boto","Aranha","Escorpião","Camarão","Lagosta","Caracol","Hiena","Raposa",
-    "Pantera","Javali","Morsa","Lula","Caranguejo","Louva-a-deus","Gaivota",
-    "Pelicano","Porco-espinho","Bicho-pau","Anaconda","Dragão-de-komodo","Furão",
-    "Calango","Sagui","Jararaca","Perereca","Preá","Jaguatirica","Ema",
-    "Seriema","Quero-quero","Bem-te-vi","Pato","Ganso","Peru","Ovelha"
+    "Pantera","Javali","Lula","Caranguejo","Louva-a-deus","Gaivota",
+    "Pelicano","Porco-espinho","Anaconda",
+    "Sagui","Jararaca","Perereca","Jaguatirica","Ema",
+    "Quero-quero","Pato","Ganso","Peru","Ovelha"
   ]},
   profissoes:{icon:"👷",color:"#457B9D",words:[
     "Médico","Astronauta","Chef","Bombeiro","Professor","Detetive","Piloto","Veterinário",
     "Arquiteto","Mergulhador","Jornalista","Cientista","Advogado","Engenheiro","Fotógrafo",
     "Músico","Cirurgião","Pedreiro","Carteiro","Padeiro","Barbeiro","Eletricista",
     "Encanador","Jardineiro","Pintor","Dentista","Farmacêutico","Psicólogo","Policial",
-    "Diplomata","Mágico","Paleontólogo","Estilista","Salva-vidas","Sommelier","Bailarina",
-    "Dublê","Tatuador","Ferreiro","Paramédico","Economista","Filósofo","Biólogo",
-    "Físico","Matemático","Astrônomo","Arqueólogo","Psiquiatra","Nutricionista",
+    "Diplomata","Mágico","Estilista","Salva-vidas","Bailarina",
+    "Dublê","Tatuador","Ferreiro","Paramédico","Economista","Biólogo",
+    "Astrônomo","Arqueólogo","Psiquiatra","Nutricionista",
     "Fisioterapeuta","Programador","Designer","Cineasta","Juiz","Delegado","Promotor",
-    "Tradutor","Curador","Publicitário","Leiloeiro","Garçom","Coveiro","Youtuber",
-    "Pizzaiolo","Surfista","Parteira","Cartógrafo","Meteorologista","Oceanógrafo",
-    "Neurocirurgião","Diplomata","Embaixador","Espião","Samurai","Gladiador",
-    "Lenhador","Minerador","Tropeiro","Caubói","Pirata","Ninja","Gondoleiro",
-    "Maestro","Regente","DJ","Locutor","Rapper","Barista",
-    "Influencer","Streamer","Podcaster","Data Scientist","UX Designer",
-    "Coach","Personal Trainer","Nutricionista Digital","Closer de Vendas",
-    "Gestor de Tráfego","Social Media","Product Manager","Scrum Master",
-    "DevOps","Ethical Hacker","Trader","Copywriter","Motion Designer"
+    "Tradutor","Publicitário","Leiloeiro","Garçom","Coveiro","Youtuber",
+    "Pizzaiolo","Surfista","Parteira",
+    "Embaixador","Espião","Samurai","Gladiador",
+    "Lenhador","Minerador","Caubói","Pirata","Ninja",
+    "Maestro","DJ","Locutor","Rapper","Barista",
+    "Influencer","Streamer","Podcaster",
+    "Coach","Personal Trainer",
+    "Social Media",
+    "Trader"
   ]},
   acoes:{icon:"🏃",color:"#2A9D8F",words:[
     "Surfar","Cozinhar","Dançar","Nadar","Escalar","Cantar","Correr","Dormir","Rir",
@@ -232,16 +249,16 @@ var CATS={
     "Roncar","Gargalhar","Soluçar","Cambalhotar","Sambar","Fazer selfie",
     "Fazer embaixadinha","Jogar tênis","Jogar boliche","Jogar xadrez","Fazer yoga",
     "Fazer careta","Imitar robô","Andar de bicicleta","Andar de skate","Pegar onda",
-    "Barbear","Maquiar","Plantar","Equilibrar","Boxear","Desenhar","Tricotar",
-    "Estacionar baliza","Trocar pneu","Passar roupa","Lavar louça","Descascar batata",
+    "Barbear","Maquiar","Plantar","Equilibrar","Boxear","Desenhar",
+    "Trocar pneu","Passar roupa","Lavar louça",
     "Soltar pipa","Pular amarelinha","Jogar peteca","Fazer flexão","Fazer polichinelo",
     "Chutar pênalti","Cabecear","Driblar","Mergulhar de ponta","Fazer estrela",
     "Andar na corda bamba","Saltar de paraquedas","Escalar montanha","Rebolado",
     "Funk","Headbanging","Moonwalk","Robozinho","Dança da cadeira",
     "Fazer live","Mandar PIX","Gravar TikTok","Fazer unboxing","Reagir a vídeo",
-    "Fazer story","Mandar áudio","Chamar Uber","Pedir delivery","Escanear QR Code",
-    "Fazer skincare","Passar protetor solar","Colocar fone bluetooth","Carregar celular",
-    "Tirar print","Dar like","Arrastar pra cima","Cancelar alguém"
+    "Fazer story","Mandar áudio","Chamar Uber","Pedir delivery",
+    "Passar protetor solar","Colocar fone bluetooth",
+    "Dar like"
   ]},
   comidas:{icon:"🍕",color:"#E9C46A",words:[
     "Pizza","Sushi","Feijoada","Hambúrguer","Lasanha","Tapioca","Açaí","Brigadeiro",
@@ -253,16 +270,16 @@ var CATS={
     "Baião de dois","Pamonha","Canjica","Pé de moleque","Rapadura","Goiabada",
     "Romeu e Julieta","Quindim","Bolo de rolo","Carbonara","Bruschetta",
     "Pastel de nata","Tempurá","Gyoza","Pad Thai","Crème brûlée","Escondidinho",
-    "Tutu de feijão","Bolinho de bacalhau","Frango à parmegiana","Virado à paulista",
-    "Arroz carreteiro","Barreado","Tacacá","Cupim","Costela no bafo",
-    "Galinhada","Rabada","Mocotó","Dobradinha","Buchada","Sarapatel",
+    "Tutu de feijão","Bolinho de bacalhau","Frango à parmegiana",
+    "Arroz carreteiro","Cupim","Costela no bafo",
+    "Galinhada","Rabada","Mocotó",
     "Bolo de fubá","Curau","Cuscuz","Tapioca recheada","Acarajé",
     "Açaí na tigela","Caldinho de feijão","Espetinho","Bauru","Misto quente",
     "Pão na chapa","Média","Mortadela do Mercadão","X-tudo","Podrão",
     "Poke","Bubble tea","Smash burger","Açaí com granola","Kombucha",
-    "Toast de abacate","Croffle","Matcha latte","Ceviche peruano","Bowl",
-    "Burrata","Brioche","Korean BBQ","Hot roll","Bao","Edamame",
-    "Donut gourmet","Cookie recheado","Gelato","Affogato","Cold brew"
+    "Toast de abacate","Matcha latte","Ceviche peruano","Bowl",
+    "Burrata","Brioche","Korean BBQ","Hot roll",
+    "Donut gourmet","Cookie recheado","Gelato","Cold brew"
   ]},
   nostalgia:{icon:"📼",color:"#06D6A0",words:[
     "Tamagotchi","Furby","Super Nintendo","Mega Drive","PlayStation 1","Game Boy","Diskman",
@@ -285,9 +302,9 @@ var CATS={
   ]}
 };
 
-var ROUND=60;
-var state={scr:"home",cat:null,words:[],idx:0,time:ROUND,results:[],fb:null,btns:false};
-var tickId=null,fbId=null,lastAct=0,betaNeut=null;
+var TIME_OPTIONS=[30,60,90,120,0];
+var state={scr:"home",cat:null,words:[],idx:0,time:60,roundTime:60,results:[],fb:null,btns:false};
+var tickId=null,fbId=null,lastAct=0,betaNeut=null,wakeLock=null;
 
 function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
 function vib(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
@@ -316,12 +333,19 @@ function buildGrid(){
 }
 
 function startGame(k){
-  state.cat=k;state.idx=0;state.time=ROUND;state.results=[];state.fb=null;betaNeut=null;
+  state.cat=k;state.idx=0;state.time=state.roundTime;state.results=[];state.fb=null;betaNeut=null;
   state.words=shuffle(CATS[k].words);
   reqOrientation(function(){
     renderReady();
     showScreen("ready");
   });
+}
+
+function getTiltAngle(e){
+  var orient=screen.orientation?screen.orientation.angle:(window.orientation||0);
+  if(orient===90)return -e.gamma;
+  if(orient===-90||orient===270)return e.gamma;
+  return e.beta;
 }
 
 function reqOrientation(cb){
@@ -330,7 +354,7 @@ function reqOrientation(cb){
     DeviceOrientationEvent.requestPermission().then(function(p){if(p!=="granted")state.btns=true}).catch(function(){state.btns=true});
   }
   var captured=false;
-  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=e.beta;window.removeEventListener("deviceorientation",cap)}}
+  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=getTiltAngle(e);window.removeEventListener("deviceorientation",cap)}}
   window.addEventListener("deviceorientation",cap);
   setTimeout(function(){
     if(!captured){betaNeut=0;state.btns=true}
@@ -346,24 +370,40 @@ function renderReady(){
   var info="Segure o celular na testa.\n\n";
   if(state.btns)info+="Use os botões para acertar ou passar.\n\n";
   else info+="Inclinar pra baixo = Acertou ✅\nInclinar pra cima = Passou ❌\n\n";
-  info+="Você tem "+ROUND+"s!";
+  if(state.roundTime===0)info+="Modo sem limite de tempo!";
+  else info+="Você tem "+state.roundTime+"s!";
   $("readyInfo").textContent=info;
+  renderTimePicker();
+}
+
+function renderTimePicker(){
+  var tp=$("timePicker");tp.innerHTML="";
+  TIME_OPTIONS.forEach(function(t){
+    var b=document.createElement("button");
+    b.className="time-chip"+(state.roundTime===t?" active":"");
+    b.textContent=t===0?"∞":t+"s";
+    b.onclick=function(){state.roundTime=t;state.time=t;renderReady()};
+    tp.appendChild(b);
+  });
 }
 
 function beginPlaying(){
   var captured=false;
-  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=e.beta;window.removeEventListener("deviceorientation",cap)}}
+  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=getTiltAngle(e);window.removeEventListener("deviceorientation",cap)}}
   window.addEventListener("deviceorientation",cap);
   setTimeout(function(){if(!captured){betaNeut=betaNeut||0}window.removeEventListener("deviceorientation",cap)},500);
   showScreen("play");
   $("btnRow").style.display=state.btns?"flex":"none";
+  requestWakeLock();
   renderPlay();
-  startTimer();
+  if(state.roundTime!==0)startTimer();
+  else renderTimer();
   startOrientation();
 }
 
 function startTimer(){
   clearInterval(tickId);
+  if(state.roundTime===0)return;
   tickId=setInterval(function(){
     state.time--;
     renderTimer();
@@ -374,6 +414,7 @@ function startTimer(){
 
 function renderTimer(){
   var el=$("hudTimer");
+  if(state.roundTime===0){el.textContent="∞";el.className="hud-timer";return}
   el.textContent=state.time+"s";
   el.className=state.time<=10?"hud-timer warn":"hud-timer";
 }
@@ -409,9 +450,10 @@ function startOrientation(){
   if(state.btns)return;
   oriHandler=function(e){
     if(e.beta===null)return;
+    var tilt=getTiltAngle(e);
     var n=betaNeut||0;
-    if(e.beta<n-35)doAnswer(true);
-    else if(e.beta>n+35)doAnswer(false);
+    if(tilt<n-35)doAnswer(true);
+    else if(tilt>n+35)doAnswer(false);
   };
   window.addEventListener("deviceorientation",oriHandler);
 }
@@ -422,6 +464,7 @@ function stopOrientation(){
 function endGame(){
   clearInterval(tickId);
   stopOrientation();
+  releaseWakeLock();
   var ok=state.results.filter(function(r){return r.ok}).length;
   var skip=state.results.filter(function(r){return!r.ok}).length;
   $("resScore").textContent=ok;
@@ -438,6 +481,11 @@ function endGame(){
 }
 
 function replayCategory(){startGame(state.cat)}
+
+function quitGame(){clearInterval(tickId);vib([200,100,200]);endGame()}
+
+function requestWakeLock(){try{if(navigator.wakeLock)navigator.wakeLock.request("screen").then(function(l){wakeLock=l})}catch(e){}}
+function releaseWakeLock(){try{if(wakeLock){wakeLock.release();wakeLock=null}}catch(e){}}
 
 buildGrid();
 </script>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Adivinha! - Como Jogar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0f0c29;--bg2:#302b63;--bg3:#24243e;--accent1:#FF6B6B;--accent2:#FFE66D;--accent3:#4ECDC4}
+*{margin:0;padding:0;box-sizing:border-box}
+html{height:100%;width:100%;background:var(--bg)}
+body{min-height:100%;width:100%;font-family:'Nunito',sans-serif;color:#fff;background:linear-gradient(135deg,var(--bg),var(--bg2),var(--bg3));-webkit-tap-highlight-color:transparent}
+.container{max-width:480px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
+.logo{font-size:clamp(2rem,7vw,3rem);font-weight:900;letter-spacing:-2px;text-transform:uppercase;background:linear-gradient(135deg,var(--accent1),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:.25rem}
+.page-title{text-align:center;font-size:.8rem;opacity:.5;letter-spacing:3px;text-transform:uppercase;margin-bottom:2rem}
+.section{margin-bottom:1.75rem}
+.section-title{font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.section-icon{font-size:1.4rem}
+.step-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.step{display:flex;gap:.75rem;align-items:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.85rem 1rem}
+.step-num{min-width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#1a1a2e;font-weight:900;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-text{font-size:.9rem;line-height:1.5;opacity:.9}
+.step-text strong{color:var(--accent2);font-weight:800}
+.tip-box{background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.25);border-radius:12px;padding:1rem;font-size:.85rem;line-height:1.6;opacity:.85}
+.tip-box strong{color:var(--accent3)}
+.controls{display:flex;flex-direction:column;gap:.5rem}
+.control-row{display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.75rem 1rem}
+.control-icon{font-size:1.6rem;min-width:36px;text-align:center}
+.control-text{font-size:.85rem;line-height:1.4}
+.control-text strong{color:var(--accent2)}
+.btn-back{display:block;margin:2rem auto 0;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#1a1a2e;border:none;border-radius:50px;padding:1rem 2.5rem;font-size:1.1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:inherit;text-decoration:none;text-align:center}
+.btn-back:active{transform:scale(.93)}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">Adivinha!</div>
+  <div class="page-title">Como Jogar</div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🎯</span> Passo a Passo</div>
+    <ol class="step-list">
+      <li class="step">
+        <span class="step-num">1</span>
+        <span class="step-text">Escolha uma <strong>categoria</strong> na tela inicial (filmes, TV, celebridades, etc.)</span>
+      </li>
+      <li class="step">
+        <span class="step-num">2</span>
+        <span class="step-text">Escolha o <strong>tempo</strong> da rodada: 30s, 60s, 90s, 120s ou sem limite</span>
+      </li>
+      <li class="step">
+        <span class="step-num">3</span>
+        <span class="step-text">Coloque o celular <strong>na testa</strong> com a tela virada para os outros jogadores</span>
+      </li>
+      <li class="step">
+        <span class="step-num">4</span>
+        <span class="step-text">Seus amigos descrevem a palavra <strong>sem falar o nome</strong>. Tente adivinhar!</span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📱</span> Controles</div>
+    <div class="controls">
+      <div class="control-row">
+        <span class="control-icon">⬇️</span>
+        <span class="control-text"><strong>Inclinar pra baixo</strong> = Acertou! Passa para a pr&oacute;xima palavra.</span>
+      </div>
+      <div class="control-row">
+        <span class="control-icon">⬆️</span>
+        <span class="control-text"><strong>Inclinar pra cima</strong> = Passou! Pula a palavra.</span>
+      </div>
+      <div class="control-row">
+        <span class="control-icon">👆</span>
+        <span class="control-text">Sem sensor? Use os <strong>bot&otilde;es na tela</strong> para acertar ou passar.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⏱️</span> Modos de Tempo</div>
+    <div class="controls">
+      <div class="control-row">
+        <span class="control-icon">🕐</span>
+        <span class="control-text"><strong>30s / 60s / 90s / 120s</strong> - Rodada com contagem regressiva. R&aacute;pido e divertido!</span>
+      </div>
+      <div class="control-row">
+        <span class="control-icon">♾️</span>
+        <span class="control-text"><strong>Sem limite</strong> - Jogue no seu ritmo. Use o bot&atilde;o "Encerrar" quando quiser parar.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="section-icon">💡</span> Dicas</div>
+    <div class="tip-box">
+      <strong>Para quem descreve:</strong> Use gestos, sons e explica&ccedil;&otilde;es criativas. Vale tudo menos falar o nome!<br><br>
+      <strong>Para quem adivinha:</strong> Chute r&aacute;pido! Quanto mais palavras acertar, melhor sua pontua&ccedil;&atilde;o.<br><br>
+      <strong>Em grupo:</strong> Revezem quem segura o celular a cada rodada para todo mundo participar!
+    </div>
+  </div>
+
+  <a href="index.html" class="btn-back">Jogar!</a>
+</div>
+</body>
+</html>
