@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Adivinha!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0f0c29;--bg2:#302b63;--bg3:#24243e;--green:#0a8f53;--red:#c0392b;--accent1:#FF6B6B;--accent2:#FFE66D;--accent3:#4ECDC4}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'Nunito',sans-serif;color:#fff;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation}
+.screen{display:none;min-height:100dvh;width:100%;flex-direction:column;align-items:center;overflow-y:auto}
+.screen.active{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes tilt{0%,100%{transform:rotate(0)}25%{transform:rotate(-20deg)}75%{transform:rotate(20deg)}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:4px}
+
+/* HOME */
+.home-bg{background:linear-gradient(135deg,var(--bg),var(--bg2),var(--bg3));padding:1.5rem 1rem}
+.logo{font-size:clamp(2.5rem,8vw,4rem);font-weight:900;letter-spacing:-2px;text-transform:uppercase;background:linear-gradient(135deg,var(--accent1),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:1rem}
+.subtitle{font-size:.8rem;opacity:.5;letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem}
+.ai-toggle{display:flex;align-items:center;gap:.75rem;padding:.6rem 1.25rem;border-radius:50px;cursor:pointer;margin-bottom:1.5rem;transition:all .2s;max-width:420px;width:100%;justify-content:center}
+.ai-toggle.on{background:rgba(78,205,196,.15);border:1.5px solid rgba(78,205,196,.4)}
+.ai-toggle.off{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1)}
+.ai-toggle .label{font-size:.8rem;font-weight:700;letter-spacing:.5px}
+.toggle-track{width:36px;height:20px;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-track.on{background:#4ECDC4}
+.toggle-track.off{background:rgba(255,255,255,.2)}
+.toggle-knob{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle-knob.on{left:18px}
+.toggle-knob.off{left:2px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem;width:100%;max-width:420px}
+.cat-card{border-radius:16px;padding:1rem .75rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;cursor:pointer;transition:all .2s}
+.cat-card:active{transform:scale(.94)!important}
+.cat-card .icon{font-size:2rem}
+.cat-card .name{font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.cat-card .count{font-size:.65rem;opacity:.45}
+
+/* READY */
+.ready-bg{justify-content:center;padding:2rem;text-align:center}
+.ready-phone{font-size:5rem;margin-bottom:1.5rem;animation:tilt 2s ease-in-out infinite}
+.ready-title{font-size:1.75rem;font-weight:800;margin-bottom:1rem}
+.ready-info{font-size:.95rem;opacity:.85;line-height:1.8;max-width:320px;margin-bottom:2rem}
+.btn-start{background:#fff;color:#1a1a2e;border:none;border-radius:50px;padding:1rem 3rem;font-size:1.25rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:inherit}
+.btn-start:active{transform:scale(.93)}
+
+/* PLAYING */
+.play-bg{height:100dvh;justify-content:center;position:relative;transition:background .3s}
+.hud-score{position:absolute;top:1rem;left:1.5rem;font-size:1rem;font-weight:700;opacity:.7}
+.hud-timer{position:absolute;top:1rem;right:1.5rem;font-size:1.5rem;font-weight:800;opacity:.8;font-variant-numeric:tabular-nums}
+.hud-timer.warn{color:var(--accent2);animation:pulse .5s ease infinite alternate}
+.word{font-size:clamp(2.5rem,12vw,5rem);font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:-1px;text-shadow:0 4px 20px rgba(0,0,0,.3);padding:0 2rem;line-height:1.1}
+.fb-text{position:absolute;bottom:18%;font-size:1.5rem;font-weight:800;text-transform:uppercase;letter-spacing:4px;opacity:.9}
+.btn-row{position:absolute;bottom:2rem;display:flex;gap:1.5rem;width:100%;justify-content:center;padding:0 1rem}
+.btn-action{flex:1;max-width:180px;padding:1rem;border:none;border-radius:16px;font-size:1.1rem;font-weight:800;color:#fff;cursor:pointer;text-transform:uppercase;box-shadow:0 4px 15px rgba(0,0,0,.2);font-family:inherit}
+.btn-action:active{transform:scale(.93)}
+.btn-skip{background:rgba(231,76,60,.85)}
+.btn-ok{background:rgba(39,174,96,.85)}
+
+/* RESULT */
+.result-bg{background:linear-gradient(135deg,var(--bg),var(--bg2),var(--bg3));padding:2rem 1rem}
+.result-title{font-size:2rem;font-weight:900;margin-top:1rem;text-transform:uppercase;letter-spacing:-1px}
+.result-score{font-size:4rem;font-weight:900;background:linear-gradient(135deg,var(--accent3),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:.25rem 0}
+.result-sub{font-size:.85rem;opacity:.5;margin-bottom:1.25rem}
+.result-list{width:100%;max-width:400px;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem;max-height:45dvh;overflow-y:auto;padding-right:.25rem}
+.result-item{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;border-radius:12px}
+.result-item.ok{background:rgba(78,205,196,.15);border:1px solid rgba(78,205,196,.3)}
+.result-item.fail{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3)}
+.result-item .rw{font-size:.95rem;font-weight:600}
+.result-item .ri{font-size:1.2rem}
+.ri.ok{color:#4ECDC4}
+.ri.fail{color:#FF6B6B}
+.btn-again{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#1a1a2e;border:none;border-radius:50px;padding:1rem 2.5rem;font-size:1.1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:2px;margin-bottom:.75rem;font-family:inherit}
+.btn-home{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.2);border-radius:50px;padding:.75rem 2rem;font-size:.9rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:2px;font-family:inherit}
+.btn-again:active,.btn-home:active{transform:scale(.93)}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(15,12,41,.96);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:1.25rem}
+.loading-overlay.active{display:flex}
+.loading-spin{font-size:3rem;animation:spin 1.5s linear infinite}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingScreen">
+  <div class="loading-spin">🧠</div>
+  <div style="font-size:1.1rem;font-weight:700;opacity:.8">Gerando palavras com IA...</div>
+  <div style="font-size:.75rem;opacity:.35">Preparando desafio único</div>
+</div>
+
+<div class="screen home-bg active" id="homeScreen">
+  <div class="logo">Adivinha!</div>
+  <div class="subtitle">Jogo de Mímica</div>
+  <div class="ai-toggle on" id="aiToggle" onclick="toggleAI()">
+    <span id="aiIcon">🧠</span>
+    <span class="label" id="aiLabel">Palavras infinitas com IA</span>
+    <div class="toggle-track on" id="toggleTrack"><div class="toggle-knob on" id="toggleKnob"></div></div>
+  </div>
+  <div class="grid" id="catGrid"></div>
+</div>
+
+<div class="screen ready-bg" id="readyScreen">
+  <div class="ready-phone">📱</div>
+  <div class="ready-title" id="readyTitle"></div>
+  <div class="ready-info" id="readyInfo"></div>
+  <button class="btn-start" onclick="beginPlaying()">Começar!</button>
+</div>
+
+<div class="screen play-bg" id="playScreen">
+  <div class="hud-score" id="hudScore">✅ 0  ❌ 0</div>
+  <div class="hud-timer" id="hudTimer">60s</div>
+  <div class="word" id="wordDisplay"></div>
+  <div class="fb-text" id="fbText" style="display:none"></div>
+  <div class="btn-row" id="btnRow" style="display:none">
+    <button class="btn-action btn-skip" onclick="doAnswer(false)">❌ Passar</button>
+    <button class="btn-action btn-ok" onclick="doAnswer(true)">✅ Acertou</button>
+  </div>
+</div>
+
+<div class="screen result-bg" id="resultScreen">
+  <div class="result-title">Fim de Jogo!</div>
+  <div class="result-score" id="resScore">0</div>
+  <div class="result-sub" id="resSub"></div>
+  <div class="result-list" id="resList"></div>
+  <button class="btn-again" onclick="replayCategory()">Jogar Novamente</button>
+  <button class="btn-home" onclick="showScreen('home')">Categorias</button>
+</div>
+
+<script>
+var CATS={
+  animais:{icon:"🐾",color:"#FF6B35",prompt:"animais variados (mamíferos, aves, répteis, insetos, marinhos)",words:["Elefante","Gato","Cachorro","Papagaio","Tubarão","Borboleta","Cavalo","Tartaruga","Águia","Cobra","Golfinho","Leão","Urso","Pinguim","Coruja","Camaleão","Polvo","Girafa","Lobo","Flamingo","Baleia","Tigre","Coelho","Jacaré","Arara","Formiga","Abelha","Sapo","Macaco","Panda","Hipopótamo","Rinoceronte","Zebra","Canguru","Foca","Lhama","Tatu","Capivara","Preguiça","Pavão","Tucano","Morcego","Ornitorrinco","Iguana","Piranha","Água-viva","Castor","Búfalo","Corvo","Salamandra"]},
+  filmes:{icon:"🎬",color:"#E63946",prompt:"filmes famosos de todos os gêneros",words:["Titanic","Matrix","Avatar","Gladiador","Interestelar","Parasita","Coringa","Frozen","Shrek","Batman","Jurassic Park","Toy Story","Homem-Aranha","Vingadores","Star Wars","Indiana Jones","Rocky","Ghostbusters","Rei Leão","Procurando Nemo","Ratatouille","Up","Coco","Encanto","Moana","Aladdin","Forrest Gump","O Poderoso Chefão","De Volta pro Futuro","E.T.","Os Incríveis","Divertida Mente","Harry Potter","Senhor dos Anéis","Piratas do Caribe","Missão Impossível","Mad Max","O Máskara","Kung Fu Panda","Mulan","Dumbo","Bambi","Coraline","Megamente","Bolt","Wall-E","Carros","Zootopia","Soul","Luca"]},
+  profissoes:{icon:"👷",color:"#457B9D",prompt:"profissões e ocupações variadas",words:["Médico","Astronauta","Chef","Bombeiro","Professor","Detetive","Piloto","Veterinário","Arquiteto","Mergulhador","Jornalista","Cientista","Advogado","Engenheiro","Fotógrafo","Músico","Cirurgião","Pedreiro","Carteiro","Padeiro","Barbeiro","Eletricista","Encanador","Jardineiro","Pintor","Dentista","Farmacêutico","Psicólogo","Policial","Diplomata","Mágico","Paleontólogo","Estilista","Salva-vidas","Cabeleireiro","Garçom","Youtuber","Coveiro","Leiloeiro","Sommelier","Bailarina","Dublê","Pizzaiolo","Tatuador","Surfista","Ferreiro","Oleiro","Parteira","Paramédico","Cartógrafo"]},
+  acoes:{icon:"🏃",color:"#2A9D8F",prompt:"ações físicas que podem ser mimicadas",words:["Surfar","Cozinhar","Dançar","Nadar","Escalar","Cantar","Correr","Dormir","Rir","Chorar","Pular","Dirigir","Pescar","Pintar","Voar","Mergulhar","Lutar","Meditar","Patinar","Esquiar","Aplaudir","Assobiar","Tropeçar","Espirrar","Bocejar","Abraçar","Girar","Rastejar","Digitar","Martelar","Varrer","Costurar","Remar","Cavalgar","Escorregar","Engatinhar","Pular corda","Flexão","Fotografar","Bochechar","Malabares","Arremessar","Soletrar","Roncar","Gaguejar","Cambalhotar","Fungar","Cochilar","Gargalhar","Soluçar"]},
+  comidas:{icon:"🍕",color:"#E9C46A",prompt:"comidas e pratos de todo o mundo",words:["Pizza","Sushi","Feijoada","Hambúrguer","Lasanha","Tapioca","Açaí","Brigadeiro","Coxinha","Pastel","Churrasco","Paella","Croissant","Taco","Risoto","Yakisoba","Strogonoff","Moqueca","Acarajé","Pudim","Pipoca","Waffle","Crepe","Fondue","Ravioli","Pão de queijo","Vatapá","Ceviche","Cachorro-quente","Sorvete","Churros","Dim Sum","Kebab","Falafel","Tiramisù","Baklava","Ramen","Tempurá","Pretzel","Nachos","Brownie","Macaron","Quiche","Guacamole","Calzone","Carpaccio","Goulash","Pierogi","Empanada","Cheesecake"]},
+  lugares:{icon:"🗺️",color:"#8338EC",prompt:"lugares e construções do mundo",words:["Praia","Vulcão","Deserto","Floresta","Cachoeira","Iglú","Pirâmide","Castelo","Farol","Caverna","Estádio","Aeroporto","Hospital","Shopping","Biblioteca","Museu","Zoológico","Parque","Cemitério","Laboratório","Circo","Teatro","Igreja","Fazenda","Ilha","Montanha","Ponte","Aquário","Observatório","Labirinto","Oásis","Arranha-céu","Coliseu","Palácio","Submarino","Mina","Recife","Catacumba","Estufa","Favelinha","Moinho","Forte","Mercado","Bangalô","Cais","Pomar","Mirante","Dojo","Hangar","Sótão"]},
+  celebridades:{icon:"⭐",color:"#F72585",prompt:"celebridades mundialmente famosas",words:["Neymar","Beyoncé","Einstein","Pelé","Madonna","Michael Jackson","Chaplin","Messi","Cristiano Ronaldo","Shakira","Elvis","Picasso","Beethoven","Da Vinci","Napoleão","Shakespeare","Mozart","Bob Marley","Frida Kahlo","Steve Jobs","Elon Musk","Adele","Taylor Swift","Rihanna","Lady Gaga","The Rock","Anitta","Xuxa","Silvio Santos","Gisele Bündchen","Ronaldinho","Ayrton Senna","Carmen Miranda","Michael Jordan","Usain Bolt","Oprah","Bruce Lee","Marilyn Monroe","Freddie Mercury","Maradona"]},
+  objetos:{icon:"🔧",color:"#06D6A0",prompt:"objetos do cotidiano",words:["Guarda-chuva","Tesoura","Bicicleta","Óculos","Relógio","Espelho","Escada","Martelo","Violão","Microfone","Skate","Binóculo","Extintor","Trampolim","Ampulheta","Bússola","Canivete","Lanterna","Apito","Megafone","Balança","Telescópio","Estetoscópio","Paraquedas","Prancha","Catapulta","Ventilador","Raquete","Aspirador","Metrônomo","Grampeador","Furadeira","Pandeiro","Berimbau","Tobogã","Capacete","Mochila","Periscópio","Alicate","Termômetro"]}
+};
+
+var ROUND=60;
+var state={scr:"home",cat:null,words:[],idx:0,time:ROUND,results:[],fb:null,btns:false,ai:true,used:{}};
+var tickId=null,fbId=null,lastAct=0,betaNeut=null,fetching=false;
+
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
+function vib(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function $(id){return document.getElementById(id)}
+
+function showScreen(name){
+  state.scr=name;
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active")});
+  $(name+"Screen").classList.add("active");
+}
+
+function toggleAI(){
+  state.ai=!state.ai;
+  var t=$("aiToggle"),tr=$("toggleTrack"),kn=$("toggleKnob");
+  t.className="ai-toggle "+(state.ai?"on":"off");
+  tr.className="toggle-track "+(state.ai?"on":"off");
+  kn.className="toggle-knob "+(state.ai?"on":"off");
+  $("aiIcon").textContent=state.ai?"🧠":"📦";
+  $("aiLabel").textContent=state.ai?"Palavras infinitas com IA":"Apenas palavras locais";
+  buildGrid();
+}
+
+function buildGrid(){
+  var g=$("catGrid");g.innerHTML="";
+  var keys=Object.keys(CATS);
+  keys.forEach(function(k,i){
+    var c=CATS[k];
+    var d=document.createElement("div");
+    d.className="cat-card";
+    d.style.background="linear-gradient(145deg,"+c.color+"15,"+c.color+"35)";
+    d.style.border="2px solid "+c.color+"55";
+    d.style.animation="fadeUp 0.4s ease "+i*0.06+"s both";
+    d.onclick=function(){startGame(k)};
+    d.innerHTML='<span class="icon">'+c.icon+'</span><span class="name">'+k+'</span><span class="count">'+(state.ai?"∞ palavras":c.words.length+" palavras")+'</span>';
+    g.appendChild(d);
+  });
+}
+
+function fetchAI(catKey,exclude){
+  var cat=CATS[catKey];
+  return fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
+      messages:[{role:"user",content:"Gere exatamente 25 palavras para jogo Heads Up, categoria: "+cat.prompt+".\nRegras: populares no Brasil, fáceis de mimar, máx 3 palavras por item, NÃO repita: "+exclude.slice(0,60).join(",")+"\nResponda APENAS JSON array: [\"Palavra1\",\"Palavra2\"]"}]
+    })
+  }).then(function(r){return r.json()}).then(function(d){
+    var t=(d.content||[]).map(function(i){return i.text||""}).join("").trim();
+    return JSON.parse(t.replace(/```json|```/g,"").trim());
+  }).catch(function(e){console.error("AI error:",e);return[]});
+}
+
+function startGame(k){
+  state.cat=k;state.idx=0;state.time=ROUND;state.results=[];state.fb=null;state.used={};betaNeut=null;fetching=false;
+  var base=shuffle(CATS[k].words);
+
+  function afterWords(w){
+    state.words=w;
+    reqOrientation(function(){
+      renderReady();
+      showScreen("ready");
+    });
+  }
+
+  if(state.ai){
+    $("loadingScreen").classList.add("active");
+    fetchAI(k,base).then(function(aiW){
+      $("loadingScreen").classList.remove("active");
+      var bs={};base.forEach(function(w){bs[w]=1});
+      var fresh=aiW.filter(function(w){return!bs[w]});
+      afterWords(shuffle(base.concat(fresh)));
+    });
+  }else{
+    afterWords(base);
+  }
+}
+
+function reqOrientation(cb){
+  state.btns=false;
+  if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
+    DeviceOrientationEvent.requestPermission().then(function(p){if(p!=="granted")state.btns=true}).catch(function(){state.btns=true});
+  }
+  var captured=false;
+  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=e.beta;window.removeEventListener("deviceorientation",cap)}}
+  window.addEventListener("deviceorientation",cap);
+  setTimeout(function(){
+    if(!captured){betaNeut=0;state.btns=true}
+    window.removeEventListener("deviceorientation",cap);
+    cb();
+  },1500);
+}
+
+function renderReady(){
+  var c=CATS[state.cat];
+  $("readyScreen").style.background="linear-gradient(135deg,"+c.color+"dd,"+c.color+")";
+  $("readyTitle").textContent=c.icon+" "+state.cat.toUpperCase();
+  var info="Segure o celular na testa.\n\n";
+  if(state.btns)info+="Use os botões para acertar ou passar.\n\n";
+  else info+="Inclinar pra baixo = Acertou ✅\nInclinar pra cima = Passou ❌\n\n";
+  info+="Você tem "+ROUND+"s!";
+  if(state.ai)info+="\n🧠 IA gerando palavras em tempo real";
+  $("readyInfo").textContent=info;
+}
+
+function beginPlaying(){
+  var captured=false;
+  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=e.beta;window.removeEventListener("deviceorientation",cap)}}
+  window.addEventListener("deviceorientation",cap);
+  setTimeout(function(){if(!captured){betaNeut=betaNeut||0}window.removeEventListener("deviceorientation",cap)},500);
+
+  showScreen("play");
+  $("btnRow").style.display=state.btns?"flex":"none";
+  renderPlay();
+  startTimer();
+  startOrientation();
+}
+
+function startTimer(){
+  clearInterval(tickId);
+  tickId=setInterval(function(){
+    state.time--;
+    renderTimer();
+    if(state.time<=0){clearInterval(tickId);vib([200,100,200,100,200]);endGame()}
+    else if(state.time===10)vib(100);
+  },1000);
+}
+
+function renderTimer(){
+  var el=$("hudTimer");
+  el.textContent=state.time+"s";
+  el.className=state.time<=10?"hud-timer warn":"hud-timer";
+}
+
+function renderPlay(){
+  if(state.fb==="ok"){$("wordDisplay").textContent="✅";$("fbText").textContent="Acertou!";$("fbText").style.display="block"}
+  else if(state.fb==="skip"){$("wordDisplay").textContent="❌";$("fbText").textContent="Passou!";$("fbText").style.display="block"}
+  else{$("wordDisplay").textContent=state.words[state.idx]||"";$("fbText").style.display="none"}
+  $("hudScore").textContent="✅ "+state.results.filter(function(r){return r.ok}).length+"  ❌ "+state.results.filter(function(r){return!r.ok}).length;
+  $("playScreen").style.background=state.fb==="ok"?"#0a8f53":state.fb==="skip"?"#c0392b":(CATS[state.cat]?CATS[state.cat].color:"#302b63");
+  if(state.btns)$("btnRow").style.display=state.fb?"none":"flex";
+}
+
+function doAnswer(ok){
+  var now=Date.now();
+  if(now-lastAct<800)return;
+  lastAct=now;
+  vib(ok?[50]:[30,50,30]);
+  state.fb=ok?"ok":"skip";
+  state.used[state.words[state.idx]]=1;
+  state.results.push({word:state.words[state.idx],ok:ok});
+  renderPlay();
+
+  // Prefetch AI
+  if(state.ai&&!fetching&&state.words.length-state.idx<=8){
+    fetching=true;
+    fetchAI(state.cat,Object.keys(state.used).concat(state.words)).then(function(nw){
+      if(nw.length){var u=state.used;state.words=state.words.concat(nw.filter(function(w){return!u[w]}))}
+      fetching=false;
+    });
+  }
+
+  clearTimeout(fbId);
+  fbId=setTimeout(function(){
+    state.fb=null;
+    if(state.idx+1>=state.words.length){clearInterval(tickId);endGame()}
+    else{state.idx++;renderPlay()}
+  },600);
+}
+
+var oriHandler=null;
+function startOrientation(){
+  stopOrientation();
+  if(state.btns)return;
+  oriHandler=function(e){
+    if(e.beta===null)return;
+    var n=betaNeut||0;
+    if(e.beta<n-35)doAnswer(true);
+    else if(e.beta>n+35)doAnswer(false);
+  };
+  window.addEventListener("deviceorientation",oriHandler);
+}
+function stopOrientation(){
+  if(oriHandler){window.removeEventListener("deviceorientation",oriHandler);oriHandler=null}
+}
+
+function endGame(){
+  clearInterval(tickId);
+  stopOrientation();
+  var ok=state.results.filter(function(r){return r.ok}).length;
+  var skip=state.results.filter(function(r){return!r.ok}).length;
+  $("resScore").textContent=ok;
+  $("resSub").textContent=ok+" acerto"+(ok!==1?"s":"")+" · "+skip+" passou · "+state.results.length+" total";
+  var list=$("resList");list.innerHTML="";
+  state.results.forEach(function(r,i){
+    var d=document.createElement("div");
+    d.className="result-item "+(r.ok?"ok":"fail");
+    d.style.animation="fadeUp 0.3s ease "+i*0.04+"s both";
+    d.innerHTML='<span class="rw">'+r.word+'</span><span class="ri '+(r.ok?"ok":"fail")+'">'+(r.ok?"✓":"✗")+'</span>';
+    list.appendChild(d);
+  });
+  showScreen("result");
+}
+
+function replayCategory(){startGame(state.cat)}
+
+// Init
+buildGrid();
+</script>
+</body>
+</html>
