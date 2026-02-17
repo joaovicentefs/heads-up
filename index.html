@@ -303,8 +303,8 @@ var CATS={
 };
 
 var TIME_OPTIONS=[30,60,90,120,0];
-var state={scr:"home",cat:null,words:[],idx:0,time:60,roundTime:60,results:[],fb:null,btns:false};
-var tickId=null,fbId=null,lastAct=0,betaNeut=null,wakeLock=null;
+var state={scr:"home",cat:null,words:[],idx:0,time:60,roundTime:60,results:[],fb:null};
+var tickId=null,fbId=null,lastAct=0,wakeLock=null;
 
 function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
 function vib(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
@@ -333,43 +333,17 @@ function buildGrid(){
 }
 
 function startGame(k){
-  state.cat=k;state.idx=0;state.time=state.roundTime;state.results=[];state.fb=null;betaNeut=null;
+  state.cat=k;state.idx=0;state.time=state.roundTime;state.results=[];state.fb=null;
   state.words=shuffle(CATS[k].words);
-  reqOrientation(function(){
-    renderReady();
-    showScreen("ready");
-  });
-}
-
-function getTiltAngle(e){
-  var orient=screen.orientation?screen.orientation.angle:(window.orientation||0);
-  if(orient===90)return -e.gamma;
-  if(orient===-90||orient===270)return e.gamma;
-  return e.beta;
-}
-
-function reqOrientation(cb){
-  state.btns=false;
-  if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
-    DeviceOrientationEvent.requestPermission().then(function(p){if(p!=="granted")state.btns=true}).catch(function(){state.btns=true});
-  }
-  var captured=false;
-  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=getTiltAngle(e);window.removeEventListener("deviceorientation",cap)}}
-  window.addEventListener("deviceorientation",cap);
-  setTimeout(function(){
-    if(!captured){betaNeut=0;state.btns=true}
-    window.removeEventListener("deviceorientation",cap);
-    cb();
-  },1500);
+  renderReady();
+  showScreen("ready");
 }
 
 function renderReady(){
   var c=CATS[state.cat];
   $("readyScreen").style.background="linear-gradient(135deg,"+c.color+"dd,"+c.color+")";
   $("readyTitle").textContent=c.icon+" "+state.cat.toUpperCase();
-  var info="Segure o celular na testa.\n\n";
-  if(state.btns)info+="Use os botões para acertar ou passar.\n\n";
-  else info+="Inclinar pra baixo = Acertou ✅\nInclinar pra cima = Passou ❌\n\n";
+  var info="Use os botões para acertar ou passar.\n\n";
   if(state.roundTime===0)info+="Modo sem limite de tempo!";
   else info+="Você tem "+state.roundTime+"s!";
   $("readyInfo").textContent=info;
@@ -388,17 +362,12 @@ function renderTimePicker(){
 }
 
 function beginPlaying(){
-  var captured=false;
-  function cap(e){if(e.beta!==null&&!captured){captured=true;betaNeut=getTiltAngle(e);window.removeEventListener("deviceorientation",cap)}}
-  window.addEventListener("deviceorientation",cap);
-  setTimeout(function(){if(!captured){betaNeut=betaNeut||0}window.removeEventListener("deviceorientation",cap)},500);
   showScreen("play");
-  $("btnRow").style.display=state.btns?"flex":"none";
+  $("btnRow").style.display="flex";
   requestWakeLock();
   renderPlay();
   if(state.roundTime!==0)startTimer();
   else renderTimer();
-  startOrientation();
 }
 
 function startTimer(){
@@ -425,7 +394,7 @@ function renderPlay(){
   else{$("wordDisplay").textContent=state.words[state.idx]||"";$("fbText").style.display="none"}
   $("hudScore").textContent="✅ "+state.results.filter(function(r){return r.ok}).length+"  ❌ "+state.results.filter(function(r){return!r.ok}).length;
   $("playScreen").style.background=state.fb==="ok"?"#0a8f53":state.fb==="skip"?"#c0392b":(CATS[state.cat]?CATS[state.cat].color:"#302b63");
-  if(state.btns)$("btnRow").style.display=state.fb?"none":"flex";
+  $("btnRow").style.display=state.fb?"none":"flex";
 }
 
 function doAnswer(ok){
@@ -444,26 +413,8 @@ function doAnswer(ok){
   },600);
 }
 
-var oriHandler=null;
-function startOrientation(){
-  stopOrientation();
-  if(state.btns)return;
-  oriHandler=function(e){
-    if(e.beta===null)return;
-    var tilt=getTiltAngle(e);
-    var n=betaNeut||0;
-    if(tilt<n-35)doAnswer(true);
-    else if(tilt>n+35)doAnswer(false);
-  };
-  window.addEventListener("deviceorientation",oriHandler);
-}
-function stopOrientation(){
-  if(oriHandler){window.removeEventListener("deviceorientation",oriHandler);oriHandler=null}
-}
-
 function endGame(){
   clearInterval(tickId);
-  stopOrientation();
   releaseWakeLock();
   var ok=state.results.filter(function(r){return r.ok}).length;
   var skip=state.results.filter(function(r){return!r.ok}).length;
