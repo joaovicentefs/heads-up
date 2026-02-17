@@ -1,0 +1,25 @@
+{
+  "name": "Adivinha! - Jogo de Adivinhação",
+  "short_name": "Adivinha!",
+  "description": "Jogo de adivinhação para jogar com amigos. Coloque o celular na testa e adivinhe!",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0c29",
+  "theme_color": "#0f0c29",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
